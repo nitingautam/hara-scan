@@ -1,0 +1,33 @@
+version: '3'
+volumes:
+  node_modules:
+services:
+  ganache_priv:
+    logging:
+      driver: none
+    image: trufflesuite/ganache-cli:v6.1.6
+    command: ganache-cli --db /var/task/ganache_priv -h 0.0.0.0 --p 8546 --account='0x808f2d3173474c6d28381582b1316474d35a7404b25842c3f79985b594370cc1,500000000000000000000'
+    ports:
+      - "8546:8546"
+    volumes:
+      - ./ganache_priv:/var/task/ganache_priv
+  dynamodb_local:
+    image: hara:scan
+    command: bash -c "sls dynamodb start -p 8000 --migrate true --dbPath=/var/task/dynamodb_data"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./dynamodb_data:/var/task/dynamodb_data
+  hara_watcher:
+    image: hara:scan
+    environment:
+      - PRIV_NETWORK=http://ganache_priv:8546
+      - IS_DEV=true
+    depends_on:
+      - ganache_priv
+      - dynamodb_local
+    command: bash -c "npm run dev && tail -f /dev/null"
+    volumes:
+      - .:/var/task
+      - node_modules:/var/task/node_modules
+  

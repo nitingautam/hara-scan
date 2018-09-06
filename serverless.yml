@@ -1,0 +1,59 @@
+service: hara-watcher # NOTE: update this with your service name
+
+custom:
+  serverless-offline:
+    babelOptions:
+      presets: ["es2015"]
+  webpackIncludeModules:
+    webpackConfig: 'webpack.config.js'
+    packager: 'npm'
+
+plugins:
+  - serverless-offline
+  - serverless-offline-scheduler
+  - serverless-dynamodb-local
+  - serverless-webpack
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  region: local
+  stage: ${opt:stage, 'dev'}
+  environment:
+    PRIV_NETWORK: http://ganache_priv:8546
+    IS_DEV: true
+
+package:
+  exclude:
+    - node_modules/dynamodb-localhost/**
+    - node_modules/serverless-dynamodb-local/**
+    - node_modules/serverless-offline/**
+    - tests/**
+
+functions:
+  get_address_transactions:
+    handler: handler._watch
+    timeout: 10
+    events:
+    - schedule: rate(1 minute)
+
+resources:
+  Resources:
+    haraBlock:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: type
+            AttributeType: S
+          - AttributeName: hash
+            AttributeType: S
+        KeySchema:
+          - AttributeName: type
+            KeyType: HASH
+          - AttributeName: hash
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: hara_block_${self:provider.stage}
