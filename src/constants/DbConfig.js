@@ -4,7 +4,7 @@ import { DataMapper } from '@aws/dynamodb-data-mapper';
 const AWSaccesssKeyId = process.env.AWS_ACCESS_KEY_ID ? AWS_ACCESS_KEY_ID : "not-important";
 const AWSsecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY ? process.env.AWS_SECRET_ACCESS_KEY : "not-important";
 const AWSregion = process.env.REGION ? process.env.REGION : "local";
-const AWSendpoint = "http://dynamodb_local:8000";
+const AWSendpoint = "http://192.168.99.100:8000";
 
 export const configDB = () => {
   let config = {

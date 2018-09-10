@@ -1,6 +1,14 @@
 const slsw = require("serverless-webpack");
 const nodeExternals = require("webpack-node-externals");
 
+try {
+  require("babel-polyfill");
+} catch (e) {
+  if (e.message.indexOf('only one instance of babel-polyfill is allowed') === -1) {
+    console.error(e);
+  }
+}
+
 module.exports = {
   entry: slsw.lib.entries,
   target: "node",

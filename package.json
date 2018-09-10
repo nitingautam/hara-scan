@@ -27,7 +27,7 @@
   },
   "scripts": {
     "start": "sls deploy",
-    "dev": "sls offline start --noTimeout --location .webpack/service"
+    "dev": "sls offline start --noTimeout --host 0.0.0.0 --noTimeout --location .webpack/service"
   },
   "devDependencies": {
     "nyc": "^13.0.1"
