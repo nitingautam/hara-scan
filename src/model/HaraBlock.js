@@ -1,5 +1,7 @@
-import { TB_HARA_BLOCK, InitDB, Mapper } from "../constants/DbConfig";
+import { TB_HARA_BLOCK, Mapper, InitDB } from "../constants/DbConfig";
 import { DynamoDbSchema, DynamoDbTable } from "@aws/dynamodb-data-mapper";
+import { promisify } from "util";
+import { between } from "@aws/dynamodb-expressions";
 
 class _haraBlock {}
 Object.defineProperties(_haraBlock.prototype, {
@@ -48,133 +50,66 @@ Object.defineProperties(_haraBlock.prototype, {
   }
 });
 
+/**
+ * @author allandhino pattras
+ */
 export default class HaraBlock {
   constructor() {
     this.tblName = TB_HARA_BLOCK;
+
+    this.ddb = InitDB();
+    this.dynamoDBQueryAsync = promisify(this.ddb.query).bind(this.ddb);
+    this.lastState;
   }
 
-  _insertBlock = (data, blockStatus = "pending") => {
-    return new Promise((resolve, reject) => {
-      if ("hash" in data) {
-        const db = new _haraBlock();
-        let _item = Object.assign(db, data);
-        _item.blockStatus = blockStatus;
-        _item.type = "block";
-        _item.timestamp = new Date(_item.timestamp * 1000).toISOString();
-        _item.transactionsCount = _item.transactions.length;
-        _item.transactions = JSON.stringify(_item.transactions);
+  /**
+   * this function will get type "transaction" and type "block"
+   * @param {string} _type "transaction" and "block"
+   * @param {int} _page
+   * @param {int} _limit
+   * @example _type = "transactions", _page = 1, _limit = 10
+   * @return {object} if fail {boolean} false
+   */
+  _getData = async (_type = "block", _page = 1, _limit = 10) => {
+    try {
+      const lastBlockNumber = await this._getLastBlockNumber();
+      const start = lastBlockNumber - (_limit * _page) + 1;
+      const end = lastBlockNumber - ((_limit * _page) - _limit);
 
-        Mapper.put({ item: _item })
-          .then(() => {
-            resolve({
-              status: 1,
-              data: _item,
-              message: "Item with Hash " + _item.hash + " successfull saved"
-            });
-          })
-          .catch(err => {
-            console.warn(err.message);
-            resolve({
-              status: 0,
-              data: _item,
-              message: "Item with Hash " + _item.hash + " failed saved"
-            });
-          });
-      } else {
-        resolve({
-          status: 0,
-          message: "there is no hash inside your data"
-        });
-      }
-    });
+      var params = {
+        TableName: this.tblName,
+        IndexName: "type_blocknumber",
+        ExpressionAttributeNames: {
+          "#type": "type",
+          "#number": "number"
+        },
+        ExpressionAttributeValues: {
+          ":type": _type,
+          ":start": start, 
+          ":end": end
+        },
+        KeyConditionExpression: "#type = :type AND #number BETWEEN :start AND :end",
+        ScanIndexForward: false,
+      };
+  
+      return await this.dynamoDBQueryAsync(params);
+    } catch (error) {
+      console.log("HaraBlock@_getTx", error.message);
+      return false;
+    }
   };
 
-  _insertTransaction = data => {
-    return new Promise((resolve, reject) => {
-      if ("transactionHash" in data) {
-        const db = new _haraBlock();
-        let _item = Object.assign(db, data);
-        _item.type = "transactions";
-        _item.hash = _item.transactionHash;
-        _item.timestamp = new Date().toISOString();
-
-        if (_item.logs.length == 0) {
-          _item.transactionType = "user_to_user";
-        } else if (_item.logs.length == 1) {
-          _item.transactionType = "contract_creation";
-        } else {
-          _item.transactionType = "user_to_contract";
-        }
-
-        _item.logs = JSON.stringify(_item.logs);
-        _item.status = _item.status ? "true" : "false";
-        _item.contractAddress = _item.contractAddress
-          ? _item.contractAddress.toString()
-          : "*";
-        _item.number = _item.blockNumber;
-
-        Mapper.put({ item: _item })
-          .then(() => {
-            resolve({
-              status: 1,
-              data: _item,
-              message:
-                "Item with transaction Hash " +
-                _item.hash +
-                " successfull saved"
-            });
-          })
-          .catch(err => {
-            console.warn(err.message);
-            resolve({
-              status: 0,
-              data: _item,
-              message:
-                "Item with transaction Hash " + _item.hash + " failed saved"
-            });
-          });
-      } else {
-        resolve({
-          status: 0,
-          message: "there is no transaction Hash inside your data"
-        });
-      }
-    });
-  };
-
-  _insertPendingTransaction = txHash => {
-    return new Promise((resolve, reject) => {
-      let db = new _haraBlock();
-      db.type = "transactions";
-      db.hash = txHash;
-      db.status = "pending";
-
-      Mapper.put({ item: db })
-        .then(() => {
-          resolve({
-            status: 1,
-            data: db,
-            message: "Item with transaction Hash " + db.hash + " is Pending"
-          });
-        })
-        .catch(err => {
-          console.warn(err.message);
-          resolve({
-            status: 0,
-            data: db,
-            message:
-              "Item with transaction Hash " +
-              db.hash +
-              " is pending failed to saved"
-          });
-        });
-    });
-  };
-
+  /**
+   * get detail of tx hash
+   * @param {string} txHash 
+   * @return {object} if fail <boolean> false
+   */
   _getTxData = async txHash => {
     let db = new _haraBlock();
-    db.type = "transactions";
+    db.type = "transaction";
     db.hash = txHash;
+
+    console.log(db.hash);
 
     let result = await new Promise((resolve, reject) => {
       Mapper.get({ item: db })
@@ -186,10 +121,38 @@ export default class HaraBlock {
         });
     });
 
+    console.log(result);
+
     if (result) {
       return result;
     }
 
     return false;
   };
+  
+  /**
+   * get last block number from dynamodb
+   * @returns {int} if fail {boolean} false
+   */
+  _getLastBlockNumber = async () => {
+    let db = new _haraBlock();
+    db.type = "last_block_number";
+    db.hash = "*";
+
+    let result = await new Promise((resolve, reject) => {
+      Mapper.get({ item: db })
+        .then(val => {
+          resolve(val);
+        })
+        .catch(err => {
+          resolve(false);
+        });
+    });
+
+    if (result && "number" in result) {
+      return result.number;
+    }
+
+    return false;
+  }
 }

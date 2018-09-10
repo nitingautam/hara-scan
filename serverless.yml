@@ -11,7 +11,6 @@ custom:
 plugins:
   - serverless-offline
   - serverless-offline-scheduler
-  - serverless-dynamodb-local
   - serverless-webpack
 
 provider:
@@ -31,29 +30,26 @@ package:
     - tests/**
 
 functions:
-  get_address_transactions:
-    handler: handler._watch
+  get_transactions:
+    handler: handler._getTransactions
     timeout: 10
     events:
-    - schedule: rate(1 minute)
+    - http:
+        path: get_transactions
+        method: get
 
-resources:
-  Resources:
-    haraBlock:
-      Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: type
-            AttributeType: S
-          - AttributeName: hash
-            AttributeType: S
-        KeySchema:
-          - AttributeName: type
-            KeyType: HASH
-          - AttributeName: hash
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: hara_block_${self:provider.stage}
+  get_blocks:
+    handler: handler._getBlocks
+    timeout: 10
+    events:
+    - http:
+        path: get_blocks
+        method: get
+  
+  get_detail_transaction:
+    handler: handler._getDetailTransaction
+    timeout: 10
+    events:
+    - http:
+        path: get_detail_transaction
+        method: get
