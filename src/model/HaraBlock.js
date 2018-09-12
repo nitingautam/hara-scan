@@ -31,6 +31,8 @@ Object.defineProperties(_haraBlock.prototype, {
       number: { type: "Number" },
       gasLimit: { type: "Number" },
       gasUsed: { type: "Number" },
+      gasPrice: { type: "Number" },
+      gas: { type: "Number" },
       nonce: { type: "String" },
       timestamp: { type: "String" },
       extraData: { type: "String" },
@@ -45,7 +47,11 @@ Object.defineProperties(_haraBlock.prototype, {
       cumulativeGasUsed: { type: "Number" },
       contractAddress: { type: "String" },
       logs: { type: "String" },
-      status: { type: "String" }
+      status: { type: "String" },
+      from: { type: "String" },
+      to: { type: "String" },
+      value: { type: "Number" },
+      input: { type: "String" }
     }
   }
 });
@@ -108,8 +114,6 @@ export default class HaraBlock {
     let db = new _haraBlock();
     db.type = "transaction";
     db.hash = txHash;
-
-    console.log(db.hash);
 
     let result = await new Promise((resolve, reject) => {
       Mapper.get({ item: db })
