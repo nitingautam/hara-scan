@@ -19,7 +19,8 @@ provider:
   region: local
   stage: ${opt:stage, 'dev'}
   environment:
-    PRIV_NETWORK: http://ganache_priv:8546
+    PRIV_NETWORK: ${env:PRIV_NETWORK}
+    DB_ENDPOINT: ${env:DB_ENDPOINT}
     IS_DEV: true
 
 package:
