@@ -18,6 +18,19 @@ provider:
   runtime: nodejs6.10
   region: local
   stage: ${opt:stage, 'dev'}
+  role: ${env:ROLE}
+  tags:
+    Namespace: hara-watcher
+    # change the [service-name]
+    Name: hara-watcher-[scan]-${self:provider.stage}
+    Stage: ${self:provider.stage}
+  # tags for all stacks generate by serverless, exp dynamodb, cloudwatch, etc
+  # same with lambda tags
+  stackTags:
+    Namespace: hara-watcher
+    # change the [service-name]
+    Name: hara-watcher-[scan]-${self:provider.stage}
+    Stage: ${self:provider.stage}
   environment:
     PRIV_NETWORK: http://ganache_priv:8546
     IS_DEV: true
@@ -37,6 +50,14 @@ functions:
     - http:
         path: get_transactions
         method: get
+  
+  get_transactions_by_address:
+    handler: handler._getTransactionsByAddress
+    timeout: 10
+    events:
+    - http:
+        path: get_transactions_by_address
+        method: get
 
   get_blocks:
     handler: handler._getBlocks
@@ -53,3 +74,35 @@ functions:
     - http:
         path: get_detail_transaction
         method: get
+
+resources:
+  Resources:    
+    hara_block:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: type
+            AttributeType: S
+          - AttributeName: hash
+            AttributeType: S
+          - AttributeName: address
+            AttributeType: S
+        KeySchema:
+          - AttributeName: type
+            KeyType: HASH
+          - AttributeName: hash
+            KeyType: RANGE
+        LocalSecondaryIndexes:
+          - IndexName: type_address
+            KeySchema:
+              - AttributeName: type
+                KeyType: HASH
+              - AttributeName: address
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: hara_block_${self:provider.stage}

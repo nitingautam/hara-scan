@@ -1,0 +1,29 @@
+version: '3'
+services:
+  dynamodb_local:
+    image: haratoken/blockchain-dynamodb-local:1.27.2
+    command: bash -c "sls dynamodb start -p 8000 --migrate true --dbPath=/var/task/dynamodb_data"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./dynamodb_data:/var/task/dynamodb_data
+
+  hara_watcher:
+    image: hara:scan
+    environment:
+      - PRIV_NETWORK=http://192.168.99.100:8546
+      - MAIN_NETWORK=http://192.168.99.100:8545
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - REGION=${REGION}
+      - ROLE=${ROLE}
+      - STAGE=${STAGE}
+      - AWS_ENDPOINT=${AWS_ENDPOINT}
+      - TB_HARA_BLOCK=${TB_HARA_BLOCK}
+      - IS_DEV=true
+    command: bash -c "npm run dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/var/task
+  
