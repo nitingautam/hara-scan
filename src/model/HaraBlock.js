@@ -109,20 +109,38 @@ export default class HaraBlock {
     try {
       var params = {
         TableName: this.tblName,
-        IndexName: "type_address",
+        IndexName: "type_from",
         ExpressionAttributeNames: {
           "#type": "type",
-          "#address": "address"
+          "#from": "from"
         },
         ExpressionAttributeValues: {
           ":type": _type,
-          ":address": _address
+          ":from": _address
         },
-        KeyConditionExpression: "#type = :type AND #address = :address",
+        KeyConditionExpression: "#type = :type AND #from = :from",
         ScanIndexForward: false,
       };
-  
-      return await this.dynamoDBQueryAsync(params);
+      let fromResponse = await this.dynamoDBQueryAsync(params);
+      console.log("fromResponse");
+      console.log(fromResponse);
+      params = {
+        TableName: this.tblName,
+        IndexName: "type_to",
+        ExpressionAttributeNames: {
+          "#type": "type",
+          "#to": "to"
+        },
+        ExpressionAttributeValues: {
+          ":type": _type,
+          ":to": _address
+        },
+        KeyConditionExpression: "#type = :type AND #to = :to",
+        ScanIndexForward: false,
+      };
+      let toResponse = await this.dynamoDBQueryAsync(params);
+      fromResponse.Items = fromResponse.Items.concat(toResponse.Items);
+      return fromResponse;
     } catch (error) {
       console.log("HaraBlock@_getTxByAddress", error.message);
       return false;

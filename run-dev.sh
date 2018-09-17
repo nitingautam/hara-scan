@@ -7,4 +7,4 @@ docker-machine start
 docker build -t hara:scan .
 
 # now run local env 
-docker-compose up
+docker-compose --file docker_compose_test.yml up
