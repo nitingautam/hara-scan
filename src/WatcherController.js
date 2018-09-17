@@ -72,17 +72,11 @@ export const _Web3Functions = async (event, context, callback) => {
       statusCode: 401,
       body: JSON.stringify({message: "you need function parameter"})
     });
-    
   }
 
   if(event.queryStringParameters && "params" in event.queryStringParameters) {
     _params = event.queryStringParameters.params;
-  } else {
-    callback(null, {
-      statusCode: 401,
-      body: JSON.stringify({message: "you need params parameter"})
-    });
-  }
+  } 
 
   let data = await new PrivateNet()._web3Alias(_function, _params);
 
