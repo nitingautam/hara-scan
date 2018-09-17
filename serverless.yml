@@ -121,6 +121,14 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
+          - IndexName: type_blocknumber
+            KeySchema:
+              - AttributeName: type
+                KeyType: HASH
+              - AttributeName: number
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
