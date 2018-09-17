@@ -1,0 +1,20 @@
+version: '3'
+services:
+  hara_watcher:
+    image: hara:scan
+    environment:
+      - PRIV_NETWORK=${PRIV_NETWORK}
+      - MAIN_NETWORK=${MAIN_NETWORK}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - REGION=${REGION}
+      - ROLE=${ROLE}
+      - STAGE=${STAGE}
+      - AWS_ENDPOINT=${AWS_ENDPOINT}
+      - TB_HARA_BLOCK=${TB_HARA_BLOCK}
+    command: bash -c "sls deploy --stage $STAGE"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/var/task
+  

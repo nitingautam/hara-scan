@@ -105,6 +105,48 @@ export default class HaraBlock {
     }
   };
 
+  _queryDataByContractAddress = async (_type = "transaction", _address, _page = 1, _limit = 10) => {
+    try {
+      var params = {
+        TableName: this.tblName,
+        IndexName: "type_from",
+        ExpressionAttributeNames: {
+          "#type": "type",
+          "#from": "from"
+        },
+        ExpressionAttributeValues: {
+          ":type": _type,
+          ":from": _address
+        },
+        KeyConditionExpression: "#type = :type AND #from = :from",
+        ScanIndexForward: false,
+      };
+      let fromResponse = await this.dynamoDBQueryAsync(params);
+      console.log("fromResponse");
+      console.log(fromResponse);
+      params = {
+        TableName: this.tblName,
+        IndexName: "type_to",
+        ExpressionAttributeNames: {
+          "#type": "type",
+          "#to": "to"
+        },
+        ExpressionAttributeValues: {
+          ":type": _type,
+          ":to": _address
+        },
+        KeyConditionExpression: "#type = :type AND #to = :to",
+        ScanIndexForward: false,
+      };
+      let toResponse = await this.dynamoDBQueryAsync(params);
+      fromResponse.Items = fromResponse.Items.concat(toResponse.Items);
+      return fromResponse;
+    } catch (error) {
+      console.log("HaraBlock@_getTxByAddress", error.message);
+      return false;
+    }
+  };
+
   /**
    * get detail of tx hash
    * @param {string} txHash 

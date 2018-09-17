@@ -1,9 +1,13 @@
-import { _Transactions, _DetailTransactions, _Web3Functions } from "./src/WatcherController";
+import { _Transactions, _DetailTransactions, _Web3Functions, _TransactionsByAddress } from "./src/WatcherController";
 
 'use strict';
 
 const _getTransactions = async (event, context, callback) => {
   await _Transactions(event, context, callback, "transaction");
+};
+
+const _getTransactionsByAddress = async (event, context, callback) => {
+  await _TransactionsByAddress(event, context, callback, "transaction");
 };
 
 const _getBlocks = async (event, context, callback) => {
@@ -22,5 +26,6 @@ export {
   _getTransactions,
   _getBlocks,
   _getDetailTransaction,
-  _getWeb3Functions
+  _getWeb3Functions,
+  _getTransactionsByAddress
 }
