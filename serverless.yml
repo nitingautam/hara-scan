@@ -54,3 +54,11 @@ functions:
     - http:
         path: get_detail_transaction
         method: get
+
+  get_alias_functions:
+    handler: handler._getWeb3Functions
+    timeout: 60
+    events:
+    - http:
+        path: get_alias_functions
+        method: get

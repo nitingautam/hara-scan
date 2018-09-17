@@ -1,4 +1,5 @@
 import HaraBlock from "./model/HaraBlock";
+import PrivateNet from "./network/PrivateNet";
 
 /**
  * get _Transaction data with type "transaction" and "block"
@@ -50,6 +51,40 @@ export const _DetailTransactions = async (event, context, callback) => {
   }
 
   let data = await new HaraBlock()._getTxData(txHash);
+
+  callback(null, {
+    status: data ? 200 : 401,
+    body: JSON.stringify({
+      message: data ? "success" : "failed",
+      data: data ? data : {}
+    })
+  });
+}
+
+export const _Web3Functions = async (event, context, callback) => {
+  let _function = false;
+  let _params = [];
+
+  if(event.queryStringParameters && "function" in event.queryStringParameters) {
+    _function = event.queryStringParameters.function;
+  } else {
+    callback(null, {
+      statusCode: 401,
+      body: JSON.stringify({message: "you need function parameter"})
+    });
+    
+  }
+
+  if(event.queryStringParameters && "params" in event.queryStringParameters) {
+    _params = event.queryStringParameters.params;
+  } else {
+    callback(null, {
+      statusCode: 401,
+      body: JSON.stringify({message: "you need params parameter"})
+    });
+  }
+
+  let data = await new PrivateNet()._web3Alias(_function, _params);
 
   callback(null, {
     status: data ? 200 : 401,
