@@ -12,7 +12,6 @@ services:
       - STAGE=${STAGE}
       - AWS_ENDPOINT=${AWS_ENDPOINT}
       - TB_HARA_BLOCK=${TB_HARA_BLOCK}
+      - IS_DEV=false
     command: bash -c "sls deploy --stage $STAGE"
-    ports:
-      - "3000:3000"
   
