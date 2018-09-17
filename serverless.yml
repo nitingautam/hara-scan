@@ -32,7 +32,8 @@ provider:
     Name: hara-watcher-[scan]-${self:provider.stage}
     Stage: ${self:provider.stage}
   environment:
-    PRIV_NETWORK: http://ganache_priv:8546
+    PRIV_NETWORK: ${env:PRIV_NETWORK}
+    DB_ENDPOINT: ${env:DB_ENDPOINT}
     IS_DEV: true
 
 package:
@@ -75,6 +76,14 @@ functions:
         path: get_detail_transaction
         method: get
 
+  get_alias_functions:
+    handler: handler._getWeb3Functions
+    timeout: 60
+    events:
+    - http:
+        path: get_alias_functions
+        method: get
+
 resources:
   Resources:    
     hara_block:
@@ -109,6 +118,14 @@ resources:
               - AttributeName: type
                 KeyType: HASH
               - AttributeName: to
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: type_blocknumber
+            KeySchema:
+              - AttributeName: type
+                KeyType: HASH
+              - AttributeName: number
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
