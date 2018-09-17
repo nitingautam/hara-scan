@@ -2,7 +2,7 @@ import AWS from "aws-sdk";
 import { DataMapper } from "@aws/dynamodb-data-mapper";
 
 const AWSaccesssKeyId = process.env.AWS_ACCESS_KEY_ID
-  ? AWS_ACCESS_KEY_ID
+  ? process.env.AWS_ACCESS_KEY_ID
   : "not-important";
 const AWSsecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
   ? process.env.AWS_SECRET_ACCESS_KEY
