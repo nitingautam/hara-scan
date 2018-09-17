@@ -105,7 +105,7 @@ export default class HaraBlock {
     }
   };
 
-  _queryDataByContractAddress = async (_type = "transaction", _address, _page = 1, _limit = 10) => {
+  _queryDataByAddress = async (_type = "transaction", _address, _page = 1, _limit = 10) => {
     try {
       var params = {
         TableName: this.tblName,
@@ -118,6 +118,7 @@ export default class HaraBlock {
           ":type": _type,
           ":from": _address
         },
+        Limit: _limit,
         KeyConditionExpression: "#type = :type AND #from = :from",
         ScanIndexForward: false,
       };
@@ -138,14 +139,45 @@ export default class HaraBlock {
         KeyConditionExpression: "#type = :type AND #to = :to",
         ScanIndexForward: false,
       };
-      let toResponse = await this.dynamoDBQueryAsync(params);
-      fromResponse.Items = fromResponse.Items.concat(toResponse.Items);
+      if(fromResponse.Items.length < _limit){
+        let toResponse = await this.dynamoDBQueryAsync(params);
+        fromResponse.Items = fromResponse.Items.concat(toResponse.Items);
+      }
+      fromResponse.Items.sort(function(a, b){ // sort object by timestamp
+        var dateA=new Date(a.timestamp), dateB=new Date(b.timestamp)
+        return dateB-dateA; //sort by date ascending
+      });
       return fromResponse;
     } catch (error) {
       console.log("HaraBlock@_getTxByAddress", error.message);
       return false;
     }
   };
+
+  /* _getContracts = async (_type = "transaction", _page = 1, _limit = 10) => {
+    try {
+      var params = {
+        TableName: this.tblName,
+        IndexName: "type_contractAddress",
+        ExpressionAttributeNames: {
+          "#type": "type",
+          "#contractAddress": "contractAddress"
+        },
+        ExpressionAttributeValues: {
+          ":type": _type,
+          ":contractAddress": "*"
+        },
+        Limit: _limit,
+        KeyConditionExpression: "#type = :type AND  #contractAddress = :contractAddress",
+        ScanIndexForward: false,
+      };
+      let response = await this.dynamoDBQueryAsync(params);
+      return response;
+    } catch (error) {
+      console.log("HaraBlock@_getTxByAddress", error.message);
+      return false;
+    }
+  }; */
 
   /**
    * get detail of tx hash

@@ -60,6 +60,14 @@ functions:
         path: get_transactions_by_address
         method: get
 
+  get_verified_contracts:
+    handler: handler._getVerifiedContracts
+    timeout: 10
+    events:
+    - http:
+        path: get_verified_contracts
+        method: get
+
   get_blocks:
     handler: handler._getBlocks
     timeout: 10
@@ -99,6 +107,8 @@ resources:
             AttributeType: S
           - AttributeName: to
             AttributeType: S
+          - AttributeName: contractAddress
+            AttributeType: S
         KeySchema:
           - AttributeName: type
             KeyType: HASH
@@ -118,6 +128,14 @@ resources:
               - AttributeName: type
                 KeyType: HASH
               - AttributeName: to
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: type_contractAddress
+            KeySchema:
+              - AttributeName: type
+                KeyType: HASH
+              - AttributeName: contractAddress
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
