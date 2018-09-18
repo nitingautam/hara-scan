@@ -20,7 +20,7 @@ export const configDB = () => {
     region: AWSregion
   };
 
-  if (process.env.IS_DEV || typeof process.env.IS_DEV === "undefined") {
+  if (process.env.IS_DEV == "true" || typeof process.env.IS_DEV === "undefined") {
     config = {
       ...config,
       endpoint: AWSendpoint,
