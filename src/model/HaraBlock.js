@@ -239,13 +239,21 @@ export default class HaraBlock {
    * @returns {int} if fail {boolean} false
    */
   _getTotalTransaction = async () => {
+    console.log("hitted aa");
     let db = new _haraBlock();
     db.type = "last_tx_number";
     db.hash = "*";
 
+    console.log("hitted bb");
     let result = await new Promise((resolve, reject) => {
+      console.log("hitted cc");
+
+      console.log("item db", db);
+      
       Mapper.get({ item: db })
         .then(val => {
+          console.log("then val", val);
+
           resolve(val);
         })
         .catch(err => {

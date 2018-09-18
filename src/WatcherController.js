@@ -149,7 +149,7 @@ export const _Web3Functions = async (event, context, callback) => {
   if(event.queryStringParameters && "function" in event.queryStringParameters) {
     _function = event.queryStringParameters.function;
   } else {
-    callback(null, {
+    context.succeed({
       statusCode: 401,
       body: JSON.stringify({message: "you need function parameter"})
     });
@@ -159,24 +159,28 @@ export const _Web3Functions = async (event, context, callback) => {
     _params = event.queryStringParameters.params;
   } 
 
+  console.log("_function", _function);
+  console.log("_params", _params);
+
   let data = await new PrivateNet()._web3Alias(_function, _params);
 
   console.log("data", data);
 
-  return {
+  context.succeed({
     status: data ? 200 : 401,
     body: JSON.stringify({
       message: data ? "success" : "failed",
       data: data ? data : {}
     })
-  };
+  });
 }
 
 export const _TotalTransaction = async (event, context, callback) => {
   try {
     let data = await new HaraBlock()._getTotalTransaction();
     
-    context.callbackWaitsForEmtpyEventLoop = false;
+    console.log("data", data);
+
     callback(null, {
       status: data ? 200 : 401,
       body: JSON.stringify({
