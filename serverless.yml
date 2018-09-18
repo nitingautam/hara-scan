@@ -1,17 +1,19 @@
 service: hara-scan # NOTE: update this with your service name
 
 custom:
-  serverless-offline:
-    babelOptions:
-      presets: ["es2015"]
   webpackIncludeModules:
     webpackConfig: 'webpack.config.js'
-    packager: 'npm'
+    includeModules: true
+  # serverless-offline:
+  #   babelOptions:
+  #     presets: ["es2015"]
 
 plugins:
   - serverless-offline
   - serverless-offline-scheduler
   - serverless-webpack
+
+frameworkVersion: "<=1.28.0"
 
 provider:
   name: aws
@@ -33,9 +35,9 @@ provider:
     Stage: ${self:provider.stage}
   environment:
     PRIV_NETWORK: ${env:PRIV_NETWORK}
-    DB_ENDPOINT: ${env:DB_ENDPOINT}
     IS_DEV: ${env:IS_DEV}
     TB_HARA_BLOCK: ${env:TB_HARA_BLOCK}_${self:provider.stage}
+    REGION: ${env:REGION}
 
 package:
   exclude:

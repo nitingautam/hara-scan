@@ -1,6 +1,13 @@
-import { _Transactions, _DetailTransactions, _Web3Functions, _TransactionsByAddress, _VerifiedContracts, _TotalTransaction } from "./src/WatcherController";
-
-'use strict';
+"use strict";
+import "babel-polyfill";
+import {
+  _Transactions,
+  _DetailTransactions,
+  _Web3Functions,
+  _TransactionsByAddress,
+  _VerifiedContracts,
+  _TotalTransaction
+} from "./src/WatcherController";
 
 const _getTransactions = async (event, context, callback) => {
   await _Transactions(event, context, callback, "transaction");
@@ -23,12 +30,19 @@ const _getDetailTransaction = async (event, context, callback) => {
 };
 
 const _getWeb3Functions = async (event, context, callback) => {
-  await _Web3Functions(event, context, callback);
-}
+  return _Web3Functions(event, context, callback);
+};
 
 const _getTotalTransaction = async (event, context, callback) => {
   await _TotalTransaction(event, context, callback);
-}
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: "broooh"
+    })
+  };
+};
 
 export {
   _getTransactions,
@@ -38,4 +52,4 @@ export {
   _getTransactionsByAddress,
   _getVerifiedContracts,
   _getTotalTransaction
-}
+};

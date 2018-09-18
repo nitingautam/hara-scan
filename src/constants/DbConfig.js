@@ -28,6 +28,8 @@ export const configDB = () => {
     };
   }
 
+  console.log("config", config);
+
   return config;
 };
 
