@@ -1,4 +1,4 @@
-import { _Transactions, _DetailTransactions, _Web3Functions, _TransactionsByAddress, _VerifiedContracts } from "./src/WatcherController";
+import { _Transactions, _DetailTransactions, _Web3Functions, _TransactionsByAddress, _VerifiedContracts, _TotalTransaction } from "./src/WatcherController";
 
 'use strict';
 
@@ -26,11 +26,16 @@ const _getWeb3Functions = async (event, context, callback) => {
   await _Web3Functions(event, context, callback);
 }
 
+const _getTotalTransaction = async (event, context, callback) => {
+  await _TotalTransaction(event, context, callback);
+}
+
 export {
   _getTransactions,
   _getBlocks,
   _getDetailTransaction,
   _getWeb3Functions,
   _getTransactionsByAddress,
-  _getVerifiedContracts
+  _getVerifiedContracts,
+  _getTotalTransaction
 }

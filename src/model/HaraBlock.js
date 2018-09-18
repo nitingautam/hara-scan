@@ -233,4 +233,31 @@ export default class HaraBlock {
 
     return false;
   }
+
+  /**
+   * get last block number from dynamodb
+   * @returns {int} if fail {boolean} false
+   */
+  _getTotalTransaction = async () => {
+    console.log("aaa");
+    let db = new _haraBlock();
+    db.type = "last_tx_number";
+    db.hash = "*";
+
+    let result = await new Promise((resolve, reject) => {
+      Mapper.get({ item: db })
+        .then(val => {
+          resolve(val);
+        })
+        .catch(err => {
+          resolve(false);
+        });
+    });
+
+    if (result && "number" in result) {
+      return result.number;
+    }
+
+    return false;
+  }
 }

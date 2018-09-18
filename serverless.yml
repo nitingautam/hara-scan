@@ -92,6 +92,14 @@ functions:
     - http:
         path: get_alias_functions
         method: get
+  
+  get_total_transaction:
+    handler: handler._getTotalTransaction
+    timeout: 10
+    events:
+    - http:
+        path: get_total_transaction
+        method: get
 
 resources:
   Resources:    

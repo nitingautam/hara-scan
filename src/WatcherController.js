@@ -171,3 +171,16 @@ export const _Web3Functions = async (event, context, callback) => {
     })
   });
 }
+
+export const _TotalTransaction = async (event, context, callback) => {
+  let data = await new HaraBlock()._getTotalTransaction();
+
+  callback(null, {
+    status: data ? 200 : 401,
+    body: JSON.stringify({
+      message: data ? "success" : "failed",
+      data: data ? data : {}
+    })
+  });
+}
+

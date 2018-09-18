@@ -31,8 +31,6 @@ export default class PrivateNet {
         functionName = "this.web3.eth." + functionName;
       }
 
-      console.log(functionName);
-
       let data = await eval(functionName);
 
       return data;
