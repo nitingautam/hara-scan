@@ -95,7 +95,7 @@ functions:
 
 resources:
   Resources:    
-    hara_block:
+    haraBlock:
       Type: 'AWS::DynamoDB::Table'
       DeletionPolicy: Retain
       Properties:
