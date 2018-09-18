@@ -44,5 +44,5 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - .:/var/task
+      - ./coverage:/var/task/coverage
   

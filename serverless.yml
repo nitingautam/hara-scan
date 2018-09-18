@@ -1,4 +1,4 @@
-service: hara-watcher # NOTE: update this with your service name
+service: hara-scan # NOTE: update this with your service name
 
 custom:
   serverless-offline:
@@ -16,25 +16,26 @@ plugins:
 provider:
   name: aws
   runtime: nodejs6.10
-  region: local
+  region: ${env:REGION}
   stage: ${opt:stage, 'dev'}
   role: ${env:ROLE}
   tags:
-    Namespace: hara-watcher
+    Namespace: hara-scan
     # change the [service-name]
-    Name: hara-watcher-[scan]-${self:provider.stage}
+    Name: hara-scan-${self:provider.stage}
     Stage: ${self:provider.stage}
   # tags for all stacks generate by serverless, exp dynamodb, cloudwatch, etc
   # same with lambda tags
   stackTags:
-    Namespace: hara-watcher
+    Namespace: hara-scan
     # change the [service-name]
-    Name: hara-watcher-[scan]-${self:provider.stage}
+    Name: hara-scan-${self:provider.stage}
     Stage: ${self:provider.stage}
   environment:
     PRIV_NETWORK: ${env:PRIV_NETWORK}
     DB_ENDPOINT: ${env:DB_ENDPOINT}
-    IS_DEV: true
+    IS_DEV: ${env:IS_DEV}
+    TB_HARA_BLOCK: ${env:TB_HARA_BLOCK}_${self:provider.stage}
 
 package:
   exclude:
@@ -94,7 +95,7 @@ functions:
 
 resources:
   Resources:    
-    hara_block:
+    haraBlock:
       Type: 'AWS::DynamoDB::Table'
       DeletionPolicy: Retain
       Properties:
@@ -109,6 +110,8 @@ resources:
             AttributeType: S
           - AttributeName: contractAddress
             AttributeType: S
+          - AttributeName: number
+            AttributeType: N
         KeySchema:
           - AttributeName: type
             KeyType: HASH
