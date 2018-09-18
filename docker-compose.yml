@@ -8,7 +8,7 @@ services:
       - PRIV_NETWORK=http://192.168.99.100:8546
       - DB_ENDPOINT=http://192.168.99.100:8000
       - IS_DEV=true
-      - TB_HARA_BLOCK=hara_block_dev
+      - TB_HARA_BLOCK=hara_block
     command: bash -c "npm run dev"
     ports:
       - "3000:3000"

@@ -239,7 +239,6 @@ export default class HaraBlock {
    * @returns {int} if fail {boolean} false
    */
   _getTotalTransaction = async () => {
-    console.log("aaa");
     let db = new _haraBlock();
     db.type = "last_tx_number";
     db.hash = "*";
