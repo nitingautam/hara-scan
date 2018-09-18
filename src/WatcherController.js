@@ -29,8 +29,6 @@ export const _Transactions = async (event, context, callback, type) => {
   
   let data = await new HaraBlock()._getData(type, page, limit);
 
-  console.log(data["Items"][0].contractAddress);
-
   callback(null, {
     status: data ? 200 : 401,
     body: JSON.stringify({
