@@ -110,6 +110,8 @@ resources:
             AttributeType: S
           - AttributeName: contractAddress
             AttributeType: S
+          - AttributeName: number
+            AttributeType: N
         KeySchema:
           - AttributeName: type
             KeyType: HASH
