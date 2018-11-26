@@ -1,0 +1,1 @@
+export const authorizationHeader = process.env.AUTHORIZATION_HEADER ? process.env.AUTHORIZATION_HEADER : "bearer 11bfd7908cb9ce00710e2e11ae8574774c35ef44cd8f5e4fa7d1f084b474011fb333e7d7d3e3fff768d9a918e37fc3bd99826707a0bc6bc1b9845a8c9ae77882";

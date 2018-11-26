@@ -1,19 +1,47 @@
 service: hara-scan # NOTE: update this with your service name
 
 custom:
-  webpackIncludeModules:
+  webpack:
     webpackConfig: 'webpack.config.js'
     includeModules: true
-  # serverless-offline:
-  #   babelOptions:
-  #     presets: ["es2015"]
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    seed:
+      verifiedContracts:
+        sources:
+          - table: verified_contracts_${self:provider.stage}
+            sources: [./seed-verified-contract.json]
+  documentation:
+    version: '1'
+    title: 'Hara Scan Api Documentation'
+    description: 'This is Api documentation for hara scan website'
+    models:
+      - name: "ErrorResponse"
+        description: "This is an error response model"
+        contentType: "application/json"
+        schema: ${file(models/ErrorResponse.json)}
+      - name: "PutDocumentRequest"
+        description: "PUT Document request model (inline example)"
+        contentType: "application/json"
+        schema:
+          $schema: "http://json-schema.org/draft-04/schema#"
+          properties:
+            SomeObject:
+              type: "object"
+              properties:
+                SomeAttribute:
+                  type: "string"
 
 plugins:
   - serverless-offline
   - serverless-offline-scheduler
-  - serverless-webpack
+  - serverless-openapi-documentation
 
-frameworkVersion: "<=1.28.0"
+frameworkVersion: "<=1.32.0"
 
 provider:
   name: aws
@@ -35,9 +63,12 @@ provider:
     Stage: ${self:provider.stage}
   environment:
     PRIV_NETWORK: ${env:PRIV_NETWORK}
-    IS_DEV: ${env:IS_DEV}
-    TB_HARA_BLOCK: ${env:TB_HARA_BLOCK}_${self:provider.stage}
+    IS_DEV: ${env:IS_DEV, "true"}
+    TB_HARA_BLOCK: ${env:TB_HARA_BLOCK, "hara_block"}_${self:provider.stage}
+    TB_VERIFIED_CONTRACTS: ${env:TB_VERIFIED_CONTRACTS, "verified_contracts"}_${self:provider.stage}
     REGION: ${env:REGION}
+    CREDENTIAL: ${env:CREDENTIAL, "false"}
+    SLS_DEBUG: ${env:SLS_DEBUG, "*"}
 
 package:
   exclude:
@@ -47,6 +78,14 @@ package:
     - tests/**
 
 functions:
+  get_transactions_alt:
+    handler: handler._getTransactionsAlt
+    timeout: 10
+    events:
+    - http:
+        path: get_transactions_alt
+        method: get
+        cors: true
   get_transactions:
     handler: handler._getTransactions
     timeout: 10
@@ -54,7 +93,31 @@ functions:
     - http:
         path: get_transactions
         method: get
+        cors: true
+        documentation:
+          summary: "Api to get list of transactions"
+          description: ""
+          methodResponses:
+            - statusCode: 200
+              responseBody:
+                description: "Successful response when getting the list of transactions"
+              responseModels:
+                application/json: "PutDocumentResponse"
+            - statusCode: 500
+              responseBody:
+                description: "internal server error"
+              responseModels:
+                application/json: "ErrorResponse"
   
+  get_transactions_by_address_alt:
+    handler: handler._getTransactionsByAddressAlt
+    timeout: 10
+    events:
+    - http:
+        path: get_transactions_by_address_alt
+        method: get
+        cors: true
+
   get_transactions_by_address:
     handler: handler._getTransactionsByAddress
     timeout: 10
@@ -62,6 +125,21 @@ functions:
     - http:
         path: get_transactions_by_address
         method: get
+        cors: true
+        documentation:
+          summary: "Api to get transactions by address"
+          description: ""
+          methodResponses:
+            - statusCode: 200
+              responseBody:
+                description: "Successful response when getting the list of transactions"
+              responseModels:
+                application/json: "PutDocumentResponse"
+            - statusCode: 500
+              responseBody:
+                description: "internal server error"
+              responseModels:
+                application/json: "ErrorResponse"
 
   get_verified_contracts:
     handler: handler._getVerifiedContracts
@@ -70,6 +148,53 @@ functions:
     - http:
         path: get_verified_contracts
         method: get
+        cors: true
+        documentation:
+          summary: "Api to get list of verified contracts"
+          description: ""
+          methodResponses:
+            - statusCode: 200
+              responseBody:
+                description: "Successful response when getting the list of verified contracts"
+              responseModels:
+                application/json: "PutDocumentResponse"
+            - statusCode: 500
+              responseBody:
+                description: "internal server error"
+              responseModels:
+                application/json: "ErrorResponse"
+
+  insert_contracts:
+    handler: handler._insertVerifiedContracts
+    timeout: 10
+    events:
+    - http:
+        path: insert_verified_contracts
+        method: post
+        cors: true
+        documentation:
+          summary: "Api to get list of verified contracts"
+          description: ""
+          methodResponses:
+            - statusCode: 200
+              responseBody:
+                description: "Successful response when getting the list of verified contracts"
+              responseModels:
+                application/json: "PutDocumentResponse"
+            - statusCode: 500
+              responseBody:
+                description: "internal server error"
+              responseModels:
+                application/json: "ErrorResponse"
+  
+  get_blocks_alt:
+    handler: handler._getBlocksAlt
+    timeout: 10
+    events:
+    - http:
+        path: get_blocks_alt
+        method: get
+        cors: true
 
   get_blocks:
     handler: handler._getBlocks
@@ -78,6 +203,30 @@ functions:
     - http:
         path: get_blocks
         method: get
+        cors: true
+        documentation:
+          summary: "Api to get list of transaction blocks"
+          description: ""
+          methodResponses:
+            - statusCode: 200
+              responseBody:
+                description: "Successful response when getting the list of transaction blocks"
+              responseModels:
+                application/json: "PutDocumentResponse"
+            - statusCode: 500
+              responseBody:
+                description: "internal server error"
+              responseModels:
+                application/json: "ErrorResponse"
+
+  get_detail_transaction_alt:
+    handler: handler._getDetailTransactionAlt
+    timeout: 10
+    events:
+    - http:
+        path: get_detail_transaction_alt
+        method: get
+        cors: true
   
   get_detail_transaction:
     handler: handler._getDetailTransaction
@@ -86,14 +235,90 @@ functions:
     - http:
         path: get_detail_transaction
         method: get
+        cors: true
+        documentation:
+          summary: "Api to get the detail of a transaction"
+          description: ""
+          methodResponses:
+            - statusCode: 200
+              responseBody:
+                description: "Successful response when getting the transaction detail"
+              responseModels:
+                application/json: "PutDocumentResponse"
+            - statusCode: 500
+              responseBody:
+                description: "internal server error"
+              responseModels:
+                application/json: "ErrorResponse"
+
+  get_total_supply:
+    handler: handler._getTotalSupply
+    timeout: 10
+    events:
+    - http:
+        path: get_total_supply
+        method: get
+        cors: true
+        documentation:
+          summary: "Api to get the total supply of main and private network"
+          description: ""
+          methodResponses:
+            - statusCode: 200
+              responseBody:
+                description: "Successful response when getting the total supply"
+              responseModels:
+                application/json: "PutDocumentResponse"
+            - statusCode: 500
+              responseBody:
+                description: "internal server error"
+              responseModels:
+                application/json: "ErrorResponse"
 
   get_alias_functions:
     handler: handler._getWeb3Functions
-    timeout: 60
+    timeout: 10
     events:
     - http:
         path: get_alias_functions
         method: get
+        cors: true
+        documentation:
+          summary: "Api to retrieve response from another functions"
+          description: ""
+          methodResponses:
+            - statusCode: 200
+              responseBody:
+                description: "Successful response from the alias function"
+              responseModels:
+                application/json: "PutDocumentResponse"
+            - statusCode: 500
+              responseBody:
+                description: "internal server error"
+              responseModels:
+                application/json: "ErrorResponse"
+
+  get_contract_functions:
+    handler: handler._getWeb3ContractFunctions
+    timeout: 10
+    events:
+    - http:
+        path: get_contract_functions
+        method: get
+        cors: true
+        documentation:
+          summary: "Api to retrieve response from web3 related functions"
+          description: ""
+          methodResponses:
+            - statusCode: 200
+              responseBody:
+                description: "Successful response from the corresponding web3 function"
+              responseModels:
+                application/json: "PutDocumentResponse"
+            - statusCode: 500
+              responseBody:
+                description: "internal server error"
+              responseModels:
+                application/json: "ErrorResponse"
   
   get_total_transaction:
     handler: handler._getTotalTransaction
@@ -102,65 +327,37 @@ functions:
     - http:
         path: get_total_transaction
         method: get
-
-resources:
-  Resources:    
-    haraBlock:
-      Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: type
-            AttributeType: S
-          - AttributeName: hash
-            AttributeType: S
-          - AttributeName: from
-            AttributeType: S
-          - AttributeName: to
-            AttributeType: S
-          - AttributeName: contractAddress
-            AttributeType: S
-          - AttributeName: number
-            AttributeType: N
-        KeySchema:
-          - AttributeName: type
-            KeyType: HASH
-          - AttributeName: hash
-            KeyType: RANGE
-        LocalSecondaryIndexes:
-          - IndexName: type_from
-            KeySchema:
-              - AttributeName: type
-                KeyType: HASH
-              - AttributeName: from
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-          - IndexName: type_to
-            KeySchema:
-              - AttributeName: type
-                KeyType: HASH
-              - AttributeName: to
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-          - IndexName: type_contractAddress
-            KeySchema:
-              - AttributeName: type
-                KeyType: HASH
-              - AttributeName: contractAddress
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-          - IndexName: type_blocknumber
-            KeySchema:
-              - AttributeName: type
-                KeyType: HASH
-              - AttributeName: number
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: hara_block_${self:provider.stage}
+        cors: true
+        documentation:
+          summary: "Api to retrieve the total transaction occured"
+          description: ""
+          methodResponses:
+            - statusCode: 200
+              responseBody:
+                description: "Successful response from the getting the total transactions"
+              responseModels:
+                application/json: "PutDocumentResponse"
+            - statusCode: 500
+              responseBody:
+                description: "internal server error"
+              responseModels:
+                application/json: "ErrorResponse"
+  
+  get_detail_block:
+    handler: handler._getDetailBlock
+    timeout: 10
+    events:
+    - http:
+        path: get_detail_block
+        method: get
+        cors: true
+  
+  get_verified_contract_list:
+    handler: handler._getVerifiedContractsList
+    timeout: 10
+    events:
+    - http:
+        path: get_verified_contract_list
+        method: get
+        cors: true
+        

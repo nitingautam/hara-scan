@@ -13,5 +13,4 @@ services:
       - AWS_ENDPOINT=${AWS_ENDPOINT}
       - TB_HARA_BLOCK=${TB_HARA_BLOCK}
       - IS_DEV=false
-    command: bash -c "sls deploy --stage $STAGE"
-  
+    command: bash -c "sls deploy --stage $STAGE --migrate true --seed=verifiedContracts"
