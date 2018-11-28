@@ -1,0 +1,211 @@
+openapi: 3.0.0
+components:
+  schemas:
+    PutDocumentRequest:
+      properties:
+        SomeObject:
+          type: object
+          properties:
+            SomeAttribute:
+              type: string
+  securitySchemes: {}
+info:
+  title: Hara Scan Api Documentation
+  description: This is Api documentation for hara scan website
+  version: '1'
+paths:
+  /get_transactions:
+    get:
+      operationId: get_transactions
+      summary: Api to get list of transactions
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: The number of page
+          required: true
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: The limit amount of transactions
+          required: true
+      responses:
+        '200':
+          description: Successful response when getting the list of transactions
+          content: {}
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /get_transactions_by_address:
+    get:
+      operationId: get_transactions_by_address
+      summary: Api to get transactions by address
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: The number of page
+          required: true
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: The limit amount of transactions
+          required: true
+      responses:
+        '200':
+          description: Successful response when getting the list of transactions
+          content: {}
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /get_verified_contracts:
+    get:
+      operationId: get_verified_contracts
+      summary: Api to get list of verified contracts
+      parameters:
+        - in: query
+          name: contractAddress
+          schema:
+            type: string
+          description: The contract address
+          required: true
+      responses:
+        '200':
+          description: Successful response when getting the list of verified contracts
+          content: {}
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /get_blocks:
+    get:
+      operationId: get_blocks
+      summary: Api to get list of transaction blocks
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: The number of page
+          required: true
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: The limit amount of blocks
+          required: true
+      responses:
+        '200':
+          description: Successful response when getting the list of transaction blocks
+          content: {}
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /get_detail_transaction:
+    get:
+      operationId: get_detail_transaction
+      summary: Api to get the detail of a transaction
+      parameters:
+        - in: query
+          name: txHash
+          schema:
+            type: string
+          description: The transaction hash
+          required: true
+      responses:
+        '200':
+          description: Successful response when getting the transaction detail
+          content: {}
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /get_total_supply:
+    get:
+      operationId: get_total_supply
+      summary: Api to get the total supply of main and private network
+      responses:
+        '200':
+          description: Successful response when getting the total supply
+          content: {}
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /get_alias_functions:
+    get:
+      operationId: get_alias_functions
+      summary: Api to retrieve response from another functions
+      parameters:
+        - in: query
+          name: function
+          schema:
+            type: string
+          description: The function name to be called
+          required: true
+        - in: query
+          name: params
+          schema:
+            type: string
+          description: The list of paramater for the function
+      responses:
+        '200':
+          description: Successful response from the alias function
+          content: {}
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /get_contract_functions:
+    get:
+      operationId: get_contract_functions
+      summary: Api to retrieve response from web3 related functions
+      parameters:
+        - in: query
+          name: contractAddress
+          schema:
+            type: string
+          description: The contract address
+          required: true
+        - in: query
+          name: function
+          schema:
+            type: string
+          description: The function name to be called
+          required: true
+        - in: query
+          name: params
+          schema:
+            type: string
+          description: The list of paramater for the function
+      responses:
+        '200':
+          description: Successful response from the corresponding web3 function
+          content: {}
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

@@ -1,5 +1,8 @@
 # bin bash
 
+#generate documentation
+#serverless openapi -o openapi$(date +%Y%m%d%H%M%S).yml  generate
+
 # start docker machine first
 docker-machine start
 

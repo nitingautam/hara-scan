@@ -1,48 +1,38 @@
 version: '3'
+volumes:
+  node_modules:
 services:
-
   ganache_main:
     image: trufflesuite/ganache-cli:v6.1.6
-    command: ganache-cli --gasLimit 0x2D79883D2000 --db /var/task/ganache_main -h 0.0.0.0 --p 8545 --account='0x808f2d3173474c6d28381582b1316474d35a7404b25842c3f79985b594370cc1,500000000000000000000'
+    command: ganache-cli --h 0.0.0.0 --p 8545 --account='0x808f2d3173474c6d28381582b1316474d35a7404b25842c3f79985b594370cc1,500000000000000000000'
     ports:
       - "8545:8545"
-    volumes:
-      - ./ganache_main:/var/task/ganache_main
   ganache_priv:
     image: trufflesuite/ganache-cli:v6.1.6
-    command: ganache-cli --gasLimit 0x2D79883D2000 --db /var/task/ganache_priv -h 0.0.0.0 --p 8546 --account='0x808f2d3173474c6d28381582b1316474d35a7404b25842c3f79985b594370cc1,500000000000000000000'
+    command: ganache-cli -h 0.0.0.0 --p 8546 --account='0x808f2d3173474c6d28381582b1316474d35a7404b25842c3f79985b594370cc1,500000000000000000000'
     ports:
       - "8546:8546"
-    volumes:
-      - ./ganache_priv:/var/task/ganache_priv
-
-  dynamodb_local:
-    image: haratoken/blockchain-dynamodb-local:1.27.2
-    command: bash -c "npm install && sls dynamodb start -p 8000 --migrate true --dbPath=/var/task/dynamodb_data"
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./dynamodb_data:/var/task/dynamodb_data
-
   hara_watcher:
     image: hara:scan
+    environment:
+      - WATCHER_NETWORK_URL=http://ganache_main:8545
+      - WATCHER_NETWORK_ID=4
+      - WATCHER_NETWORK_ACCOUNT=0x2A4FEB48B3bC241C4bD3b7A9B420683deB572A58
+      - WATCHER_MINT_PK=0x808f2d3173474c6d28381582b1316474d35a7404b25842c3f79985b594370cc1
+      - WATCHER_MINT_PK_PATH=/blockchain/token-bridge/mint_pk_path
+      - WATCHER_CONTRACT_ADDRESS=false
+      - DEFAULT_MINT_NETWORK_URL=http://ganache_priv:8546
+      - DEFAULT_MINT_NETWORK_ID=5
+      - DEFAULT_MINT_CONTRACT_ADDRESS=false
+      - MULTIPLE_MINT_NETWORK_ID=[]
+      - MULTIPLE_MINT_NETWORK_URL=[]
+      - MULTIPLE_MINT_CONTRACT_ADDRESS=[]
+      - REGION=${REGION}
+      - ROLE=${ROLE}
+      - IS_DEV=true
+    command: bash -c "npm run test"
     depends_on:
       - ganache_main
       - ganache_priv
-    environment:
-      - PRIV_NETWORK=ganache_main:8546
-      - MAIN_NETWORK=ganache_priv:8545
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - REGION=${REGION}
-      - ROLE=${ROLE}
-      - STAGE=${STAGE}
-      - AWS_ENDPOINT=${AWS_ENDPOINT}
-      - TB_HARA_BLOCK=${TB_HARA_BLOCK}
-      - IS_DEV=true
-    command: bash -c "npm run dev"
-    ports:
-      - "3000:3000"
     volumes:
-      - ./coverage:/var/task/coverage
-  
+      - ./coverage:/app/coverage
